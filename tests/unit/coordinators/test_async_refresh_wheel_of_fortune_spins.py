@@ -11,6 +11,7 @@ from custom_components.octopus_energy.api_client.wheel_of_fortune import WheelOf
 async def test_when_now_is_not_at_30_minute_mark_and_previous_data_is_available_then_previous_data_returned():
   # Arrange
   client = OctopusEnergyApiClient("NOT_REAL")
+  client.half_hourly_offset = 0
   account_id = "ABC123"
   previous_data = WheelOfFortuneSpinsCoordinatorResult(datetime.now(), WheelOfFortuneSpinsResponse(1, 2))
 
@@ -51,6 +52,7 @@ async def test_when_results_retrieved_then_results_returned(minutes):
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_wheel_of_fortune_spins=async_mocked_get_wheel_of_fortune_spins): 
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     # Act
     result = await async_refresh_wheel_of_fortune_spins(

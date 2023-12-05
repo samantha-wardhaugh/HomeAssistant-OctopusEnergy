@@ -61,6 +61,7 @@ async def test_when_account_info_is_none_then_existing_standing_charge_returned(
   
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_standing_charge=async_mocked_get_gas_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
     retrieved_standing_charge: GasStandingChargeCoordinatorResult = await async_refresh_gas_standing_charges_data(
       current,
       client,
@@ -91,6 +92,7 @@ async def test_when_no_active_standing_charge_then_none_returned():
   
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_standing_charge=async_mocked_get_gas_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
     retrieved_standing_charge: GasStandingChargeCoordinatorResult = await async_refresh_gas_standing_charges_data(
       current,
       client,
@@ -130,6 +132,7 @@ async def test_when_current_is_not_thirty_minutes_then_existing_standing_charge_
     
     with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_standing_charge=async_mocked_get_gas_standing_charge):
       client = OctopusEnergyApiClient("NOT_REAL")
+      client.half_hourly_offset = 0
       retrieved_standing_charge: GasStandingChargeCoordinatorResult = await async_refresh_gas_standing_charges_data(
         current,
         client,
@@ -171,6 +174,7 @@ async def test_when_existing_standing_charge_is_none_then_standing_charge_retrie
   
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_standing_charge=async_mocked_get_gas_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
     retrieved_standing_charge: GasStandingChargeCoordinatorResult = await async_refresh_gas_standing_charges_data(
       current,
       client,
@@ -206,6 +210,7 @@ async def test_when_existing_standing_charge_is_old_then_standing_charge_retriev
   
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_standing_charge=async_mocked_get_gas_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
     retrieved_standing_charge: GasStandingChargeCoordinatorResult = await async_refresh_gas_standing_charges_data(
       current,
       client,
@@ -234,6 +239,7 @@ async def test_when_standing_charge_not_retrieved_then_existing_standing_charge_
   
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_standing_charge=async_mocked_get_gas_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
     retrieved_standing_charge: GasStandingChargeCoordinatorResult = await async_refresh_gas_standing_charges_data(
       current,
       client,

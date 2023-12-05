@@ -44,7 +44,7 @@ async def async_refresh_gas_standing_charges_data(
       return None
     
     new_standing_charge = None
-    if ((current.minute % 30) == 0 or 
+    if (client.is_time_for_half_hourly_call(current) or
         existing_standing_charges_result is None or
         existing_standing_charges_result.standing_charge is None or
         (existing_standing_charges_result.standing_charge["start"] is not None and existing_standing_charges_result.standing_charge["start"] < period_from)):

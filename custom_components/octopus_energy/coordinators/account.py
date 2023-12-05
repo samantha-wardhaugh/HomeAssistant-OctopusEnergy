@@ -30,7 +30,7 @@ async def async_setup_account_info_coordinator(hass, account_id: str):
     # Only get data every half hour or if we don't have any data
     current = now()
     client: OctopusEnergyApiClient = hass.data[DOMAIN][DATA_CLIENT]
-    if (DATA_ACCOUNT not in hass.data[DOMAIN] or (current.minute % 30) == 0):
+    if DATA_ACCOUNT not in hass.data[DOMAIN] or client.is_time_for_half_hourly_call(current):
       account_info = None
       try:
         account_info = await client.async_get_account(account_id)

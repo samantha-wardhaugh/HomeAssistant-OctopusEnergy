@@ -77,6 +77,7 @@ async def test_when_account_info_is_none_then_existing_rates_returned():
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_rates=async_mocked_get_gas_rates):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
     retrieved_rates = await async_refresh_gas_rates_data(
       current,
       client,
@@ -111,6 +112,7 @@ async def test_when_no_active_rates_then_none_returned():
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_rates=async_mocked_get_gas_rates):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
     retrieved_rates = await async_refresh_gas_rates_data(
       current,
       client,
@@ -150,6 +152,7 @@ async def test_when_current_is_not_thirty_minutes_then_existing_rates_returned()
 
     with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_rates=async_mocked_get_gas_rates):
       client = OctopusEnergyApiClient("NOT_REAL")
+      client.half_hourly_offset = 0
       retrieved_rates = await async_refresh_gas_rates_data(
         current,
         client,
@@ -195,6 +198,7 @@ async def test_when_existing_rates_is_none_then_rates_retrieved(existing_rates):
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_rates=async_mocked_get_gas_rates):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
     retrieved_rates = await async_refresh_gas_rates_data(
       current,
       client,
@@ -241,6 +245,7 @@ async def test_when_existing_rates_is_old_then_rates_retrieved():
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_rates=async_mocked_get_gas_rates):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
     retrieved_rates = await async_refresh_gas_rates_data(
       current,
       client,
@@ -281,6 +286,7 @@ async def test_when_rates_not_retrieved_then_existing_rates_returned():
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_rates=async_mocked_get_gas_rates):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
     retrieved_rates = await async_refresh_gas_rates_data(
       current,
       client,

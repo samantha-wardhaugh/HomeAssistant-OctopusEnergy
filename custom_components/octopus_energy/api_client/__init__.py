@@ -1,6 +1,7 @@
 import logging
 import json
 import aiohttp
+import random
 from datetime import (datetime, timedelta, time)
 
 from homeassistant.util.dt import (as_utc, now, as_local, parse_datetime)
@@ -373,6 +374,7 @@ class OctopusEnergyApiClient:
     self._gas_price_cap = gas_price_cap
 
     self.timeout = aiohttp.ClientTimeout(total=timeout_in_seconds)
+    self.half_hourly_offset = self.__get_half_hourly_offset()
 
   async def async_refresh_token(self):
     """Get the user's refresh token"""
@@ -886,7 +888,22 @@ class OctopusEnergyApiClient:
       return time(int(parts[0]), int(parts[1]))
 
     return None
-  
+
+  def __get_half_hourly_offset(self) -> int:
+    """
+    Generate a random number between 0 and 29 that represents the minute in a half-hourly period
+    we should make requests in.
+    This adds a degree of jitter, so every HA client doesn't make a request to OE's API at the
+    same time.
+    """
+    return random.randint(0, 29)
+
+  def is_time_for_half_hourly_call(self, current: datetime) -> bool:
+    """
+    Returns true if the current time matches the half hourly offset.
+    """
+    return (current.minute % 30) == self.half_hourly_offset
+
   async def async_update_intelligent_car_target_percentage(
       self, 
       account_id: str,

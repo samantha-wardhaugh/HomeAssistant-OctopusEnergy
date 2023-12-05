@@ -88,6 +88,7 @@ def assert_raised_all_saving_session_event(
 async def test_when_now_is_not_at_30_minute_mark_and_previous_data_is_available_then_previous_data_returned():
   # Arrange
   client = OctopusEnergyApiClient("NOT_REAL")
+  client.half_hourly_offset = 0
   account_id = "ABC123"
 
   for minute in range(0, 59):
@@ -143,6 +144,7 @@ async def test_when_upcoming_events_contains_events_in_past_then_events_filtered
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_saving_sessions=async_mocked_get_saving_sessions): 
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     # Act
     result = await async_refresh_saving_sessions(
@@ -184,6 +186,7 @@ async def test_when_upcoming_events_contains_joined_events_then_events_filtered_
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_saving_sessions=async_mocked_get_saving_sessions): 
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     # Act
     result = await async_refresh_saving_sessions(
@@ -225,6 +228,7 @@ async def test_when_upcoming_events_present_and_no_previous_data_then_new_event_
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_saving_sessions=async_mocked_get_saving_sessions): 
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     # Act
     result = await async_refresh_saving_sessions(
@@ -267,6 +271,7 @@ async def test_when_upcoming_events_present_and_not_in_previous_data_then_new_ev
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_saving_sessions=async_mocked_get_saving_sessions): 
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     # Act
     result = await async_refresh_saving_sessions(
@@ -310,6 +315,7 @@ async def test_when_upcoming_events_present_and_in_previous_data_then_new_event_
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_saving_sessions=async_mocked_get_saving_sessions): 
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     # Act
     result = await async_refresh_saving_sessions(
@@ -352,6 +358,7 @@ async def test_when_upcoming_events_present_and_in_previous_data_but_with_differ
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_saving_sessions=async_mocked_get_saving_sessions): 
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     # Act
     result = await async_refresh_saving_sessions(
@@ -393,6 +400,7 @@ async def test_when_previous_data_is_out_of_date_then_new_date_is_retrieved():
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_saving_sessions=async_mocked_get_saving_sessions):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     # Act
     result = await async_refresh_saving_sessions(

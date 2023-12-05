@@ -34,6 +34,7 @@ def assert_raised_events(
 async def test_when_now_is_not_at_30_minute_mark_and_previous_data_is_available_then_previous_data_returned():
   # Arrange
   client = OctopusEnergyApiClient("NOT_REAL")
+  client.half_hourly_offset = 0
 
   sensor_identifier = "ABC123"
   is_electricity = False
@@ -116,6 +117,7 @@ async def test_when_now_is_at_30_minute_mark_and_gas_sensor_then_requested_data_
   
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_consumption=async_mocked_get_gas_consumption, async_get_gas_rates=async_mocked_get_gas_rates, async_get_gas_standing_charge=async_mocked_get_gas_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     sensor_identifier = "ABC123"
     is_electricity = False
@@ -220,6 +222,7 @@ async def test_when_now_is_at_30_minute_mark_and_electricity_sensor_then_request
   
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_electricity_consumption=async_mocked_get_electricity_consumption, async_get_electricity_rates=async_mocked_get_electricity_rates, async_get_electricity_standing_charge=async_mocked_get_electricity_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     sensor_identifier = "ABC123"
     is_electricity = True
@@ -315,6 +318,7 @@ async def test_when_retrieving_gas_and_now_is_at_30_minute_mark_and_returned_dat
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_consumption=async_mocked_get_gas_consumption, async_get_gas_standing_charge=async_mocked_get_gas_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     sensor_identifier = "ABC123"
     is_electricity = False
@@ -389,6 +393,7 @@ async def test_when_retrieving_electricity_and_now_is_at_30_minute_mark_and_retu
 
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_electricity_consumption=async_mocked_get_electricity_consumption, async_get_electricity_standing_charge=async_mocked_get_electricity_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     sensor_identifier = "ABC123"
     is_electricity = True
@@ -473,6 +478,7 @@ async def test_when_not_enough_consumption_returned_then_empty_data_returned():
   
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_electricity_consumption=async_mocked_get_electricity_consumption, async_get_electricity_rates=async_mocked_get_electricity_rates, async_get_electricity_standing_charge=async_mocked_get_electricity_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     sensor_identifier = "ABC123"
     is_electricity = True
@@ -549,6 +555,7 @@ async def test_when_electricity_and_consumption_data_spans_multiple_days_then_em
   
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_electricity_consumption=async_mocked_get_electricity_consumption, async_get_electricity_rates=async_mocked_get_electricity_rates, async_get_electricity_standing_charge=async_mocked_get_electricity_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     sensor_identifier = "ABC123"
     is_electricity = True
@@ -625,6 +632,7 @@ async def test_when_gas_and_consumption_data_spans_multiple_days_then_empty_data
   
   with mock.patch.multiple(OctopusEnergyApiClient, async_get_gas_consumption=async_mocked_get_gas_consumption, async_get_gas_rates=async_mocked_get_gas_rates, async_get_gas_standing_charge=async_mocked_get_gas_standing_charge):
     client = OctopusEnergyApiClient("NOT_REAL")
+    client.half_hourly_offset = 0
 
     sensor_identifier = "ABC123"
     is_electricity = True

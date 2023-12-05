@@ -34,7 +34,7 @@ async def async_refresh_wheel_of_fortune_spins(
     account_id: str,
     existing_result: WheelOfFortuneSpinsCoordinatorResult
 ) -> WheelOfFortuneSpinsCoordinatorResult:
-  if existing_result is None or current.minute % 30 == 0:
+  if existing_result is None or client.is_time_for_half_hourly_call(current):
     try:
       result = await client.async_get_wheel_of_fortune_spins(account_id)
 

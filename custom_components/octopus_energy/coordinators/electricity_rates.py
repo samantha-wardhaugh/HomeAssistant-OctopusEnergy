@@ -58,7 +58,7 @@ async def async_refresh_electricity_rates_data(
       return None
 
     new_rates: list = None
-    if ((current.minute % 30) == 0 or 
+    if (client.is_time_for_half_hourly_call(current) or
         existing_rates_result is None or
         existing_rates_result.rates is None or
         len(existing_rates_result.rates) < 1 or
