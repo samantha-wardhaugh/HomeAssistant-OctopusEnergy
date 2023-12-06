@@ -376,6 +376,8 @@ class OctopusEnergyApiClient:
     self.timeout = aiohttp.ClientTimeout(total=timeout_in_seconds)
     self.half_hourly_offset = self.__get_half_hourly_offset()
 
+    self.default_headers = {"User-Agent": "bottlecapdave-homeassistant-octopusenergy"}
+
   async def async_refresh_token(self):
     """Get the user's refresh token"""
     if (self._graphql_expiration is not None and (self._graphql_expiration - timedelta(minutes=5)) > now()):
@@ -384,7 +386,7 @@ class OctopusEnergyApiClient:
     async with aiohttp.ClientSession(timeout=self.timeout) as client:
       url = f'{self._base_url}/v1/graphql/'
       payload = { "query": api_token_query.format(api_key=self._api_key) }
-      async with client.post(url, json=payload) as token_response:
+      async with client.post(url, json=payload, headers=self.default_headers) as token_response:
         token_response_body = await self.__async_read_response__(token_response, url)
         if (token_response_body is not None and 
             "data" in token_response_body and
@@ -406,7 +408,7 @@ class OctopusEnergyApiClient:
       # Get account response
       payload = { "query": account_query.format(account_id=account_id) }
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as account_response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as account_response:
         account_response_body = await self.__async_read_response__(account_response, url)
 
         _LOGGER.debug(f'account: {account_response_body}')
@@ -510,7 +512,7 @@ class OctopusEnergyApiClient:
       # Get account response
       payload = { "query": octoplus_saving_session_query.format(account_id=account_id) }
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as account_response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as account_response:
         response_body = await self.__async_read_response__(account_response, url)
 
         if (response_body is not None and "data" in response_body):
@@ -530,7 +532,7 @@ class OctopusEnergyApiClient:
           _LOGGER.error("Failed to retrieve saving sessions")
     
     return None
-  
+
   async def async_get_octoplus_enrollment(self, account_id: str):
     """Get the user's octoplus enrollment"""
     await self.async_refresh_token()
@@ -546,7 +548,7 @@ class OctopusEnergyApiClient:
           return response_body["data"]["octoplusAccountInfo"]["isOctoplusEnrolled"] == True
         else:
           _LOGGER.error("Failed to retrieve octoplus status")
-    
+
     return None
 
   async def async_get_octoplus_points(self):
@@ -558,7 +560,7 @@ class OctopusEnergyApiClient:
       # Get account response
       payload = { "query": octoplus_points_query }
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as account_response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as account_response:
         response_body = await self.__async_read_response__(account_response, url)
 
         if (response_body is not None and "data" in response_body and "loyaltyPointLedgers" in response_body["data"] and len(response_body["data"]["loyaltyPointLedgers"]) > 0):
@@ -577,7 +579,7 @@ class OctopusEnergyApiClient:
       # Get account response
       payload = { "query": octoplus_saving_session_join_mutation.format(account_id=account_id, event_code=event_code) }
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as account_response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as account_response:
 
         try:
           await self.__async_read_response__(account_response, url)
@@ -594,7 +596,7 @@ class OctopusEnergyApiClient:
 
       payload = { "query": live_consumption_query.format(device_id=device_id, period_from=period_from.strftime("%Y-%m-%dT%H:%M:%S%z"), period_to=period_to.strftime("%Y-%m-%dT%H:%M:%S%z")) }
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as live_consumption_response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as live_consumption_response:
         response_body = await self.__async_read_response__(live_consumption_response, url)
 
         if (response_body is not None and "data" in response_body and "smartMeterTelemetry" in response_body["data"] and response_body["data"]["smartMeterTelemetry"] is not None and len(response_body["data"]["smartMeterTelemetry"]) > 0):
@@ -618,7 +620,7 @@ class OctopusEnergyApiClient:
       has_more_rates = True
       while has_more_rates:
         url = f'{self._base_url}/v1/products/{product_code}/electricity-tariffs/{tariff_code}/standard-unit-rates?period_from={period_from.strftime("%Y-%m-%dT%H:%M:%SZ")}&period_to={period_to.strftime("%Y-%m-%dT%H:%M:%SZ")}&page={page}'
-        async with client.get(url, auth=auth) as response:
+        async with client.get(url, auth=auth, headers=self.default_headers) as response:
           data = await self.__async_read_response__(response, url)
           if data is None:
             return None
@@ -637,7 +639,7 @@ class OctopusEnergyApiClient:
     async with aiohttp.ClientSession(timeout=self.timeout) as client:
       auth = aiohttp.BasicAuth(self._api_key, '')
       url = f'{self._base_url}/v1/products/{product_code}/electricity-tariffs/{tariff_code}/day-unit-rates?period_from={period_from.strftime("%Y-%m-%dT%H:%M:%SZ")}&period_to={period_to.strftime("%Y-%m-%dT%H:%M:%SZ")}'
-      async with client.get(url, auth=auth) as response:
+      async with client.get(url, auth=auth, headers=self.default_headers) as response:
         data = await self.__async_read_response__(response, url)
         if data is None:
           return None
@@ -649,7 +651,7 @@ class OctopusEnergyApiClient:
               results.append(rate)
 
       url = f'{self._base_url}/v1/products/{product_code}/electricity-tariffs/{tariff_code}/night-unit-rates?period_from={period_from.strftime("%Y-%m-%dT%H:%M:%SZ")}&period_to={period_to.strftime("%Y-%m-%dT%H:%M:%SZ")}'
-      async with client.get(url, auth=auth) as response:
+      async with client.get(url, auth=auth, headers=self.default_headers) as response:
         data = await self.__async_read_response__(response, url)
         if data is None:
           return None
@@ -684,7 +686,7 @@ class OctopusEnergyApiClient:
     async with aiohttp.ClientSession(timeout=self.timeout) as client:
       auth = aiohttp.BasicAuth(self._api_key, '')
       url = f'{self._base_url}/v1/electricity-meter-points/{mpan}/meters/{serial_number}/consumption?period_from={period_from.strftime("%Y-%m-%dT%H:%M:%SZ")}&period_to={period_to.strftime("%Y-%m-%dT%H:%M:%SZ")}'
-      async with client.get(url, auth=auth) as response:
+      async with client.get(url, auth=auth, headers=self.default_headers) as response:
         
         data = await self.__async_read_response__(response, url)
         if (data is not None and "results" in data):
@@ -715,7 +717,7 @@ class OctopusEnergyApiClient:
     async with aiohttp.ClientSession(timeout=self.timeout) as client:
       auth = aiohttp.BasicAuth(self._api_key, '')
       url = f'{self._base_url}/v1/products/{product_code}/gas-tariffs/{tariff_code}/standard-unit-rates?period_from={period_from.strftime("%Y-%m-%dT%H:%M:%SZ")}&period_to={period_to.strftime("%Y-%m-%dT%H:%M:%SZ")}'
-      async with client.get(url, auth=auth) as response:
+      async with client.get(url, auth=auth, headers=self.default_headers) as response:
         data = await self.__async_read_response__(response, url)
         if data is None:
           return None
@@ -729,7 +731,7 @@ class OctopusEnergyApiClient:
     async with aiohttp.ClientSession(timeout=self.timeout) as client:
       auth = aiohttp.BasicAuth(self._api_key, '')
       url = f'{self._base_url}/v1/gas-meter-points/{mprn}/meters/{serial_number}/consumption?period_from={period_from.strftime("%Y-%m-%dT%H:%M:%SZ")}&period_to={period_to.strftime("%Y-%m-%dT%H:%M:%SZ")}'
-      async with client.get(url, auth=auth) as response:
+      async with client.get(url, auth=auth, headers=self.default_headers) as response:
         data = await self.__async_read_response__(response, url)
         if (data is not None and "results" in data):
           data = data["results"]
@@ -752,7 +754,7 @@ class OctopusEnergyApiClient:
     async with aiohttp.ClientSession(timeout=self.timeout) as client:
       auth = aiohttp.BasicAuth(self._api_key, '')
       url = f'{self._base_url}/v1/products/{product_code}'
-      async with client.get(url, auth=auth) as response:
+      async with client.get(url, auth=auth, headers=self.default_headers) as response:
         return await self.__async_read_response__(response, url)
 
   async def async_get_electricity_standing_charge(self, tariff_code, period_from, period_to):
@@ -767,7 +769,7 @@ class OctopusEnergyApiClient:
     async with aiohttp.ClientSession(timeout=self.timeout) as client:
       auth = aiohttp.BasicAuth(self._api_key, '')
       url = f'{self._base_url}/v1/products/{product_code}/electricity-tariffs/{tariff_code}/standing-charges?period_from={period_from.strftime("%Y-%m-%dT%H:%M:%SZ")}&period_to={period_to.strftime("%Y-%m-%dT%H:%M:%SZ")}'
-      async with client.get(url, auth=auth) as response:
+      async with client.get(url, auth=auth, headers=self.default_headers) as response:
         data = await self.__async_read_response__(response, url)
         if (data is not None and "results" in data and len(data["results"]) > 0):
           result = {
@@ -790,7 +792,7 @@ class OctopusEnergyApiClient:
     async with aiohttp.ClientSession(timeout=self.timeout) as client:
       auth = aiohttp.BasicAuth(self._api_key, '')
       url = f'{self._base_url}/v1/products/{product_code}/gas-tariffs/{tariff_code}/standing-charges?period_from={period_from.strftime("%Y-%m-%dT%H:%M:%SZ")}&period_to={period_to.strftime("%Y-%m-%dT%H:%M:%SZ")}'
-      async with client.get(url, auth=auth) as response:
+      async with client.get(url, auth=auth, headers=self.default_headers) as response:
         data = await self.__async_read_response__(response, url)
         if (data is not None and "results" in data and len(data["results"]) > 0):
           result = {
@@ -810,7 +812,7 @@ class OctopusEnergyApiClient:
       # Get account response
       payload = { "query": intelligent_dispatches_query.format(account_id=account_id) }
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_get_intelligent_dispatches: {response_body}')
 
@@ -850,7 +852,7 @@ class OctopusEnergyApiClient:
       url = f'{self._base_url}/v1/graphql/'
       payload = { "query": intelligent_settings_query.format(account_id=account_id) }
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_get_intelligent_settings: {response_body}')
 
@@ -925,7 +927,7 @@ class OctopusEnergyApiClient:
       ) }
 
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_update_intelligent_car_target_percentage: {response_body}')
 
@@ -949,7 +951,7 @@ class OctopusEnergyApiClient:
       ) }
 
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_update_intelligent_car_target_time: {response_body}')
 
@@ -966,7 +968,7 @@ class OctopusEnergyApiClient:
       ) }
 
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_turn_on_intelligent_bump_charge: {response_body}')
 
@@ -983,7 +985,7 @@ class OctopusEnergyApiClient:
       ) }
 
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_turn_off_intelligent_bump_charge: {response_body}')
 
@@ -1000,7 +1002,7 @@ class OctopusEnergyApiClient:
       ) }
 
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_turn_on_intelligent_smart_charge: {response_body}')
 
@@ -1017,7 +1019,7 @@ class OctopusEnergyApiClient:
       ) }
 
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_turn_off_intelligent_smart_charge: {response_body}')
   
@@ -1029,7 +1031,7 @@ class OctopusEnergyApiClient:
       url = f'{self._base_url}/v1/graphql/'
       payload = { "query": intelligent_device_query.format(account_id=account_id) }
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_get_intelligent_device: {response_body}')
 
@@ -1059,7 +1061,7 @@ class OctopusEnergyApiClient:
       url = f'{self._base_url}/v1/graphql/'
       payload = { "query": wheel_of_fortune_query.format(account_id=account_id) }
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_get_wheel_of_fortune_spins: {response_body}')
 
@@ -1084,7 +1086,7 @@ class OctopusEnergyApiClient:
       url = f'{self._base_url}/v1/graphql/'
       payload = { "query": wheel_of_fortune_mutation.format(account_id=account_id, supply_type="ELECTRICITY" if is_electricity == True else "GAS") }
       headers = { "Authorization": f"JWT {self._graphql_token}" }
-      async with client.post(url, json=payload, headers=headers) as response:
+      async with client.post(url, json=payload, headers={**self.default_headers, **headers}) as response:
         response_body = await self.__async_read_response__(response, url)
         _LOGGER.debug(f'async_spin_wheel_of_fortune: {response_body}')
 
